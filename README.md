@@ -62,3 +62,10 @@ Import this repository into Vercel as a Vite project. The included `vercel.json`
 Original application code is released under the [MIT License](LICENSE). **The anatomy data has its own CC BY 4.0 license**; preserve the attribution when redistributing it. Third-party dependencies retain their respective licenses.
 
 Issues and pull requests are welcome. Please include reproduction steps and browser/device details for interaction problems.
+
+## Ask about a structure (fork addition)
+
+Select any structure and use **Ask about this structure** in the detail panel to chat about it (answers in the language you ask in).
+
+- **Inside a claude.ai artifact**: uses the viewer's own Claude account via the artifact `sample` capability — no key needed.
+- **Vercel / any host**: calls `api/chat` (a Vercel Edge Function in `api/chat.ts`). Set the environment variable `ANTHROPIC_API_KEY` in the Vercel project; optional `ANTHROPIC_MODEL` (default `claude-haiku-4-5-20251001`). Every question is billed to that key, so add rate limiting or keep the deployment private before sharing it widely.
