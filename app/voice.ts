@@ -6,6 +6,8 @@ type Rec={lang:string;interimResults:boolean;continuous:boolean;maxAlternatives:
 const RecCtor=():(new()=>Rec)|null=>{const w=window as unknown as Record<string,unknown>;return (w.SpeechRecognition||w.webkitSpeechRecognition||null) as (new()=>Rec)|null;};
 
 export const canListen=()=>typeof window!=='undefined'&&!!RecCtor();
+/** True when this page may not use the microphone at all (e.g. embedded in an iframe without allow="microphone"). */
+export const micPolicyBlocked=()=>{try{const d=document as unknown as {permissionsPolicy?:{allowsFeature(f:string):boolean};featurePolicy?:{allowsFeature(f:string):boolean}};const p=d.permissionsPolicy??d.featurePolicy;return p?!p.allowsFeature('microphone'):false;}catch{return false;}};
 export const canSpeak=()=>typeof window!=='undefined'&&'speechSynthesis' in window;
 
 export type VoiceLang='zh-CN'|'en-US';

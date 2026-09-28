@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUp,Mic,MicOff,Square,Sparkles,Volume2,VolumeX} from 'lucide-react';
 import {ask,type Turn} from './ask-claude';
-import {canListen,canSpeak,defaultLang,listen,saveLang,speak,stopSpeaking,type VoiceLang} from './voice';
+import {canListen,micPolicyBlocked,canSpeak,defaultLang,listen,saveLang,speak,stopSpeaking,type VoiceLang} from './voice';
 
 const SUGGESTIONS=['What does it do?','它是做什么的？','Explain it to a 7-year-old'];
 type VoiceState='off'|'listening'|'thinking'|'speaking';
@@ -11,7 +11,8 @@ export default function AskPanel({name,system}:{name:string;system:string}){
  const [voice,setVoice]=useState<VoiceState>('off'),[lang,setLang]=useState<VoiceLang>(defaultLang),[autoRead,setAutoRead]=useState(()=>{try{return localStorage.getItem('atlas-auto-read')==='1';}catch{return false;}}),[reading,setReading]=useState<number|null>(null);
  const ctl=useRef<AbortController|null>(null),end=useRef<HTMLDivElement>(null),turnsRef=useRef<Turn[]>([]);
  const voiceOn=useRef(false),rec=useRef<ReturnType<typeof listen>|null>(null);
- const micOK=canListen(),ttsOK=canSpeak();
+ const [micBlocked,setMicBlocked]=useState(()=>canListen()&&micPolicyBlocked());
+ const micOK=canListen()&&!micBlocked,ttsOK=canSpeak();
  turnsRef.current=turns;
  useEffect(()=>()=>{voiceOn.current=false;rec.current?.cancel();ctl.current?.abort();stopSpeaking();},[]);
  useEffect(()=>{end.current?.scrollIntoView({block:'nearest'});},[turns,streaming,voice]);
@@ -34,7 +35,7 @@ export default function AskPanel({name,system}:{name:string;system:string}){
    setVoice('listening');setDraft('');
    const r=listen(lang,t=>setDraft(t));rec.current=r;
    let heard='';
-   try{heard=await r.done;}catch(e){setError((e as Error).message);break;}
+   try{heard=await r.done;}catch(e){const m=(e as Error).message;if(/blocked|not allowed/i.test(m)){setMicBlocked(true);}else setError(m);break;}
    finally{rec.current=null;}
    if(!voiceOn.current)break;
    if(!heard){setDraft('');break;} // silence ends the conversation
@@ -65,6 +66,7 @@ export default function AskPanel({name,system}:{name:string;system:string}){
    <div ref={end}/>
   </div>
   {voice!=='off'&&<div className={`ask-voice ${voice}`} role="status"><span className="ask-pulse"/>{status}</div>}
+  {micBlocked&&<p className="ask-note">{lang==='zh-CN'?'这个页面不允许用麦克风（嵌在 claude.ai 里时会这样），语音输入已隐藏。朗读仍可用。':'The microphone is blocked on this page (e.g. when embedded in claude.ai), so voice input is hidden. Read-aloud still works.'}</p>}
   <form className="ask-form" onSubmit={e=>{e.preventDefault();sendTyped(draft);}}>
    <input value={draft} onChange={e=>setDraft(e.target.value)} placeholder={micOK?'Type or tap the mic… 用中文也可以':'Ask anything… 用中文也可以'} aria-label="Your question" readOnly={voice!=='off'} onKeyDown={e=>e.stopPropagation()}/>
    {micOK&&(voice==='off'
