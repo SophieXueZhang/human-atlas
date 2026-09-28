@@ -67,5 +67,8 @@ Issues and pull requests are welcome. Please include reproduction steps and brow
 
 Select any structure and use **Ask about this structure** in the detail panel to chat about it (answers in the language you ask in).
 
+- **Voice chat**: tap the mic to talk; the answer is read aloud and it listens again, until you stop or stay silent. `中文/EN` switches the recognition language. Uses the browser's Web Speech API (no key or server): voice input works in Chrome, Edge and Safari, not Firefox; it may be blocked when the page is embedded in an iframe without microphone permission.
+- **Read aloud**: the speaker button on each answer reads it; the `Read` toggle reads every answer automatically.
+
 - **Inside a claude.ai artifact**: uses the viewer's own Claude account via the artifact `sample` capability — no key needed.
 - **Vercel / any host**: calls `api/chat` (a Vercel Edge Function in `api/chat.ts`). Set the environment variable `ANTHROPIC_API_KEY` in the Vercel project; optional `ANTHROPIC_MODEL` (default `claude-haiku-4-5-20251001`). Every question is billed to that key, so add rate limiting or keep the deployment private before sharing it widely.
